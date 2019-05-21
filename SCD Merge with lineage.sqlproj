@@ -58,5 +58,14 @@
   <ItemGroup>
     <Folder Include="Properties" />
     <Folder Include="PostDeployment" />
+    <Folder Include="dbo" />
+    <Folder Include="dbo\Tables" />
+    <Folder Include="dbo\Stored Procedures" />
+  </ItemGroup>
+  <ItemGroup>
+    <PostDeploy Include="PostDeployment\LoadCustomerData.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="dbo\Tables\CustomersOLTP.sql" />
   </ItemGroup>
 </Project>

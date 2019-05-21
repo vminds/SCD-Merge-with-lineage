@@ -2,7 +2,7 @@
 -- this data has been taken from MS WideWorldImporters sample
 -- merge statements generated using the awesome https://github.com/readyroll/generate-sql-merge
  
-MERGE INTO [dbo].[CustomersOLTP] AS [Target]
+MERGE INTO [dbo].[CustomerStaging] AS [Target]
 USING (VALUES
   (1,N'Tailspin Toys (Head Office)',1,7,2,47,48,2,20481,20481,1200.00,'2013-01-01',0.000,0,0,45,N'(727) 555-9108',N'(727) 555-4474',N'',N'',N'http://www.tailspintoys.com/',N'3802 Birch Court',N'3802 Birch Court',N'00296',geography::STGeomFromText('POINT (-82.7973247 27.7980814)', 4326),N'5325 Pine Drive',N'',N'87701',1,'2013-01-01T00:00:00','9999-12-31T23:59:59.9999999')
  ,(2,N'Tailspin Toys (Rio, VA)',1,2,2,49,47,5,28975,28975,1400.00,'2013-01-01',0.000,0,0,45,N'(571) 555-8191',N'(571) 555-4197',N'',N'',N'http://www.tailspintoys.com/',N'1488 Cotton Path',N'1488 Cotton Path',N'71046',geography::STGeomFromText('POINT (-78.4611222 38.0762485)', 4326),N'8643 Sycamore Path',N'',N'16944',1,'2013-01-01T00:00:00','9999-12-31T23:59:59.9999999')

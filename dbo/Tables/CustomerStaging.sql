@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[CustomersOLTP](
+﻿CREATE TABLE [dbo].[CustomerStaging](
 	[CustomerID] [int] NOT NULL,
 	[CustomerName] [nvarchar](100) NOT NULL,
 	[BillToCustomerID] [int] NOT NULL,

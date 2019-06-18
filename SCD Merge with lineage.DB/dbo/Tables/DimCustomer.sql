@@ -4,7 +4,7 @@
     [Name] NVARCHAR(100) NULL,
 	CreditLimit DECIMAL(18,2) NULL,
 	isOnCreditHold VARCHAR(3) NULL,
-	PaymentDays INT NULL,
+	PaymentDays SMALLINT NULL,
 	PhoneNumber	VARCHAR(20) NULL,
 	Website VARCHAR(255) NULL,
 	PostalCode VARCHAR(10) NULL,

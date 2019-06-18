@@ -24,7 +24,6 @@ CREATE TABLE #DimCustomer (BK VARCHAR(10) NOT NULL, [Name] NVARCHAR(100) NULL, C
 							PaymentDays INT NULL, PhoneNumber VARCHAR(20) NULL, Website VARCHAR(255) NULL, PostalCode VARCHAR(10) NULL,
 							LastUpdated DATETIME2(7) NOT NULL, ValidFrom DATETIME2(7) NOT NULL, ValidTo DATETIME2(7) NOT NULL, IsRowCurrent BIT NOT NULL)
 
-
 -- when using this approach, an insert into a temporary table is required due to "INSERT statement cannot be on either side of a (primary key, foreign key)" limitation.
 -- in this example it would work with the temp table, as there is no FK constraint. But typically you will have on fact tables.
 INSERT INTO #DimCustomer (BK, [Name], CreditLimit, isOnCreditHold, PaymentDays, PhoneNumber, Website, PostalCode, LastUpdated, ValidFrom, ValidTo, IsRowCurrent)

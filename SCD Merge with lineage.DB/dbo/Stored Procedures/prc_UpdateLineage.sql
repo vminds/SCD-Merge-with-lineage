@@ -1,13 +1,15 @@
 ﻿CREATE PROCEDURE [dbo].[prc_UpdateLineage]
-	@parPackageName VARCHAR(100) = '',
-	@parLoadStart DATETIME2 = NULL,
-	@parLoadEnd DATETIME2 = NULL,
-	@parSuccess BIT = 0,
-	@parRecordsInserted BIGINT = 0,
-	@parRecordsUpdated BIGINT = 0,
-	@parSSISExecutionID BIGINT = 0,
 	@parTableName VARCHAR(100) = NULL,
-	@parLineageID SMALLINT = NULL OUTPUT
+	@parPackageName VARCHAR(100) = '',
+	@parLoadStart DATETIME2(7) = NULL,
+	@parLoadEnd DATETIME2(7) = NULL,
+	@parSuccess BIT = 0,
+	@parRecordsInserted BIGINT = NULL,
+	@parRecordsUpdated BIGINT = NULL,
+	@parXmlInserted XML NULL,
+	@parXmlUpdated XML NULL,
+	@parSSISExecutionID BIGINT = 0
+	
 AS
 BEGIN
 
@@ -18,6 +20,7 @@ DECLARE @TableName VARCHAR(100) = NULL
 DECLARE @SchemaName VARCHAR(10) = NULL
 DECLARE @tblOutput TABLE ([Action] VARCHAR(50), LineageID SMALLINT)
 DECLARE @tbl VARCHAR(100) = (SELECT COALESCE(@parTableName, @parPackageName))
+
 
 SET @TableName = UPPER((
     SELECT TOP 1 t.[name]
@@ -41,6 +44,7 @@ SET @SchemaName = UPPER((
     AND t.[type]='U'
     ))
 
+-- main lineage table
 MERGE dbo.Lineage AS T
 USING (SELECT @SchemaName AS SchemaName
 		  ,@TableName AS TableName
@@ -62,7 +66,19 @@ WHEN MATCHED THEN UPDATE
 OUTPUT $action, inserted.LineageID
 INTO @tblOutput ([Action], LineageID);
 
-SET @parLineageID = (SELECT TOP 1 LineageID FROM @tblOutput)
+
+-- lineage details
+MERGE [dbo].[LineageDetail] AS T
+USING (SELECT (SELECT TOP 1 LineageID FROM @tblOutput) AS LineageID
+		  , @parXmlInserted AS xmlInserted
+		  , @parXmlUpdated AS xmlUpdated
+	   ) AS S
+ON T.LineageID=S.LineageID
+WHEN NOT MATCHED BY TARGET THEN
+INSERT (LineageId, Inserted, Updated)
+    VALUES (S.LineageId, S.xmlInserted, S.xmlUpdated)
+WHEN MATCHED THEN
+    UPDATE SET LineageId=S.LineageId, Inserted=S.xmlInserted, Updated=S.xmlUpdated;
 
 END
 

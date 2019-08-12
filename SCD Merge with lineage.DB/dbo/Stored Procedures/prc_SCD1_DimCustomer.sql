@@ -9,16 +9,16 @@ SET NOCOUNT ON
 
 BEGIN TRAN
 
-DECLARE @LoadStart DATETIME2 = GETDATE()
-DECLARE @LoadEnd DATETIME2 = NULL
+DECLARE @LoadStart DATETIME2(7) = GETDATE()
+DECLARE @LoadEnd DATETIME2(7) = NULL
+DECLARE @tblOutput TABLE ([Action] VARCHAR(50), BK VARCHAR(255), [Key] BIGINT)
+DECLARE @Success INT = 1
 DECLARE @cntInserted BIGINT = 0
 DECLARE @cntUpdated BIGINT = 0
-DECLARE @Success INT = 1
-DECLARE @LineageID SMALLINT
-DECLARE @tblOutput TABLE ([Action] VARCHAR(50), BK VARCHAR(255), [Key] BIGINT)
 DECLARE @xmlUpdated XML = NULL
 DECLARE @xmlInserted XML = NULL
 
+-- SCD1 merge
 MERGE dbo.DimCustomer AS T
     USING dbo.vw_CustomerStaging AS S
     ON T.BK=S.BK
@@ -50,7 +50,7 @@ COMMIT TRAN
 
 IF @@ERROR<>0 SET @Success=@@ERROR
 
-
+-- persist lineage
 SET @LoadEnd = GETDATE()
 SET @cntInserted = ISNULL((SELECT COUNT(*) FROM @tblOutput WHERE [Action]='INSERT'),0)
 SET @cntUpdated = ISNULL((SELECT COUNT(*) FROM @tblOutput WHERE [Action]='UPDATE'),0)
@@ -59,6 +59,7 @@ SET @xmlUpdated = (SELECT BK, [Key] FROM @tblOutput WHERE [Action]='UPDATE' FOR 
 
 
 EXEC [dbo].[prc_UpdateLineage]
+	@parTableName = 'DimCustomer',
 	@parPackageName = @SSISPackage,
 	@parLoadStart = @LoadStart,
 	@parLoadEnd = @LoadEnd,
@@ -66,21 +67,8 @@ EXEC [dbo].[prc_UpdateLineage]
 	@parRecordsInserted = @cntInserted,
 	@parRecordsUpdated = @cntUpdated,
 	@parSSISExecutionID = @SSISExecutionID,
-	@parTableName = 'DimCustomer',
-	@parLineageID = @LineageID OUTPUT;
-
-
-MERGE [dbo].[LineageDetail] AS T
-USING (SELECT @LineageID AS LineageID
-		  , @xmlInserted AS xmlInserted
-		  , @xmlUpdated AS xmlUpdated
-	   ) AS S
-ON T.LineageID=S.LineageID
-WHEN NOT MATCHED BY TARGET THEN
-INSERT (LineageId, Inserted, Updated)
-    VALUES (S.LineageId, S.xmlInserted, S.xmlUpdated)
-WHEN MATCHED THEN
-    UPDATE SET LineageId=S.LineageId, Inserted=S.xmlInserted, Updated=S.xmlUpdated;
+	@parXmlInserted = @xmlInserted,
+	@parXmlUpdated = @xmlUpdated
 
 
 END
